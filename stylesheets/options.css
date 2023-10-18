@@ -1,0 +1,34 @@
+#wp-api-caching-options
+{
+    width: calc(100% - 20px);
+}
+
+#wp-api-caching-options fieldset
+{
+    height: 0px;
+    overflow: hidden;
+    padding: 0px 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #3C434A;
+}
+
+#wp-api-caching-options fieldset > legend
+{
+    cursor: pointer;
+    user-select: none;
+}
+
+#wp-api-caching-options fieldset[collapsed="false"]
+{
+    height: auto;
+    padding: 1rem;
+}
+
+#wp-api-caching-options fieldset > legend::before
+{padding: 5px}
+
+#wp-api-caching-options fieldset[collapsed="true"] > legend::before
+{content: "\25B6"}
+
+#wp-api-caching-options fieldset[collapsed="false"] > legend::before
+{content: "\25BC"}
