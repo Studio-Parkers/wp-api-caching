@@ -9,6 +9,6 @@ add_action("admin_init", function(): void
 // Register custom pages
 add_action("admin_menu", function(): void
 {
-    add_menu_page("WP Cache", "WP Cache", "manage_options", "wp-api-caching/pages/dashboard.php");
-    add_submenu_page("options-general.php", "API Caching Options", "API Caching settings", "manage_options", "wp-api-caching/pages/options.php");
+    add_menu_page("WP Cache", "WP Cache", "manage_options", "wp-api-caching/admin/pages/dashboard.php");
+    add_submenu_page("options-general.php", "API Caching Options", "API Caching settings", "manage_options", "wp-api-caching/admin/pages/options.php");
 });
