@@ -31,3 +31,41 @@ function write_cache(string $filename, mixed $content): void
     
     file_put_contents(sprintf("%s/%s.json", WP_API_CACHE_FOLDER, $filename), json_encode($content));
 }
+
+function should_cache_response(WP_HTTP_Response $response, WP_REST_Server $server, WP_REST_Request $request)
+{
+    // Don't update cache of cached response
+    $response_headers = $response->get_headers();
+    if (isset($response_headers["X-Cache"]) && $response_headers["X-Cache"] === "HIT")
+        return false; 
+
+    // Only cache succesfull requests
+    if ($response->status !== 200)
+        return false;
+
+    // Only cache GET requests
+    if ($request->get_method() !== "GET")
+        return false;
+
+    // Load options to check if request should be cached
+    $options = get_option("wp-api-cache", null);
+    if (!$options)
+        return false;
+
+    $route = $request->get_route();
+    $route_params = $request->get_url_params();
+
+    $options = json_decode($options);
+    foreach ($options as $key => $value)
+    {
+        $option_path = base64_decode($key);
+        $option_path = preg_replace("/(\(\?P<(id)>(.*)\))/m", ":$2", $option_path);
+        foreach ($route_params as $key=> $value)
+            $option_path = str_replace(":$key", "$value", $option_path);
+
+        if ($route === $option_path)
+            return true;
+    }
+
+    return false;
+}
