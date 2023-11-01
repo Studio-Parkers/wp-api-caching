@@ -87,9 +87,18 @@ class Cache_List_Table extends WP_List_Table
 
     public function prepare_items()
     {
-        $this->_column_headers = [$this->get_columns(), [], $this->get_sortable_columns(), $this->get_primary_column_name()];
+        // Setup columns
+        $this->_column_headers = [
+            $this->get_columns(),
+            [],
+            $this->get_sortable_columns(),
+            $this->get_primary_column_name()
+        ];
+
+        // Handle actions
         $this->process_bulk_action();
 
+        // Content
         $files = scandir(WP_API_CACHE_FOLDER);
         $files = array_values(array_diff($files, [".", ".."]));
         $files = array_map(function($name) {
@@ -104,6 +113,42 @@ class Cache_List_Table extends WP_List_Table
             ];
         }, $files);
 
+        // Sorting
+        $sort_key = "name";
+        $sort_type = isset($_GET["order"]) ? $_GET["order"] : "asc";
+        switch (isset($_GET["orderby"]) ? $_GET["orderby"] : "column_route")
+        {
+            case "column_file":
+                $sort_key = "fullpath";
+                break;
+
+            case "column_filesize":
+                $sort_key = "size";
+                break;
+
+            case "column_date":
+                $sort_key = "date_modified";
+                break;
+            default:
+                $sort_key = "name";
+                break;
+        }
+
+        usort($files, function(array $a, array $b) use ($sort_key, $sort_type)
+        {
+            $first = $sort_type === "asc" ? $a : $b;
+            $second = $sort_type === "asc" ? $b : $a;
+ 
+            if ($sort_key === "name")
+                return strcmp($first["name"], $second["name"]);
+
+            if ($sort_key === "fullpath")
+                return strcmp($first["fullpath"], $second["fullpath"]);
+
+            return $first[$sort_key] - $second[$sort_key];
+        });
+
+        // Pagination
         $total_items = count($files);
         $items_per_page = $this->get_items_per_page("users_per_page");
         $current_page = $this->get_pagenum();	
