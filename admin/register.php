@@ -4,6 +4,8 @@ add_action("admin_init", function(): void
 {
     wp_enqueue_style("options-css", plugins_url("stylesheets/options.css", __FILE__));
     wp_enqueue_script("options-js", plugins_url("javascript/options.js", __FILE__), [], false, true);
+
+    wp_enqueue_style("dashboard-css", plugins_url("stylesheets/dashboard.css", __FILE__));
 });
 
 // Register custom pages
