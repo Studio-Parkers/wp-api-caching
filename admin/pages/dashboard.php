@@ -8,8 +8,10 @@ require_once sprintf("%s/%s", dirname(__FILE__, 2), "components/CacheList.php");
 $table = new Cache_List_Table();
 $table->prepare_items();
 ?>
-<h1>Caches</h1>
+<div id="wp-api-caching-dashboard">
+    <h1>Caches</h1>
 
-<div>
+    <form id="wpse-list-table-form" method="post">
     <?php $table->display(); ?>
+    </form>
 </div>
