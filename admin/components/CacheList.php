@@ -6,38 +6,30 @@ require_once sprintf("%s/%s", dirname(__FILE__, 3), "lib/utilities.php");
 
 class Cache_List_Table extends WP_List_Table
 {
+    protected function column_cb($item): string
+    {
+        return sprintf("<input type=\"checkbox\" name=\"caches[]\" value=\"%s\" />", $item["name"]);
+    }
+
     public function get_columns(): array
     {
         return [
-           "column_route"=> __("Route"),
-           "column_file"=> __("File"),
-           "column_filesize"=> __("FIle size"),
-           "column_date"=> __("Last modified"),
+            "cb"=> "<input type=\"checkbox\" />",
+            "column_route"=> __("Route"),
+            "column_file"=> __("File"),
+            "column_filesize"=> __("FIle size"),
+            "column_date"=> __("Last modified"),
         ];
     }
 
-    public function prepare_items()
+    public function get_sortable_columns(): array
     {
-        $this->_column_headers = [
-            $this->get_columns(),
-            [], // hidden columns
-            $this->get_sortable_columns(),
-            $this->get_primary_column_name(),
+        return [
+            "column_route" => ["column_route", false],
+            "column_file" => ["column_file", false],
+            "column_filesize" => ["column_filesize", false],
+            "column_date" => ["column_date", false]
         ];
-
-        $files = scandir(WP_API_CACHE_FOLDER);
-        $files = array_values(array_diff($files, [".", ".."]));
-        $this->items = array_map(function($name) {
-            $filepath = sprintf("%s/%s", WP_API_CACHE_FOLDER, $name);
-            $fileInfo = new SplFileInfo($filepath);
-            return [
-                "name" => pathinfo($name, PATHINFO_FILENAME),
-                "filename" => $name,
-                "fullpath" => $filepath,
-                "size" => $fileInfo->getSize(),
-                "date_modified" => $fileInfo->getMTime()
-            ];
-        }, $files);
     }
 
     public function column_default($item, $column_name)
@@ -52,69 +44,75 @@ class Cache_List_Table extends WP_List_Table
                 return formatBytes($item["size"]);
             case "column_date":
                 return date("d-m-Y H:i:s", $item["date_modified"]);
+            default:
+                return $item[$column_name];
         }
     }
 
-    // function prepare_items()
-    // {
-    //     global $_wp_column_headers;
-    //     $screen = get_current_screen();
+    function get_bulk_actions(): array
+    {
+        return [
+            "delete" => __("Delete")
+        ];
+    }
 
-    //     $columns = $this->get_columns();
-    //     $_wp_column_headers[$screen->id] = $columns;
-    //     $this->items = [["a", "b", "c", "d"]];
-    // }
+    function process_bulk_action()
+    {
+        if (!isset($_POST["caches"]) || empty($_POST["caches"]))
+            return;
+        
+        if (!isset($_POST["_wpnonce"]) || empty($_POST["_wpnonce"]))
+            return $this->invalid_nonce_redirect();
 
-    // /**
-    //  * Display the rows of records in the table
-    //  * @return string, echo the markup of the rows
-    //  */
-    // function display_rows()
-    // {
-    //     //Get the columns registered in the get_columns and get_sortable_columns methods
-    //     list($columns, $hidden) = $this->get_column_info();
-    //     print_r($columns);
+        $nonce = $_POST["_wpnonce"];
+        if (!wp_verify_nonce($nonce, "bulk-wp-api-cachingadminpagesdashboard"))
+            return $this->invalid_nonce_redirect();
 
-    //     //Loop for each record
-    //     if (empty($this->items))
-    //         return;
+        $action = $this->current_action();
+        if ($action !== "delete")
+            return;
 
-    //     foreach ($this->items as $item)
-    //     {
-    //         //Open the line
-    //         echo "<tr>";
-    //         foreach ($columns as $column_name => $column_display_name)
-    //         {
-    //             $attributes = sprintf("class=\"%s column-%s\" ", $column_name, $column_name);
-    //             //Style attributes for each col
-    //             if (in_array($column_name, $hidden))
-    //                 $attributes .= "style=\"display: none;\"";
-
-    //             //Display the cell
-    //             switch ($column_name)
-    //             {
-    //                 case "column_route":
-    //                     echo sprintf("<td %s>Route</td>", $attributes);
-    //                     break;
-    //                 case "column_file":
-    //                     echo sprintf("<td %s>File</td>", $attributes);
-    //                     break;
-    //                 case "column_filesize":
-    //                     echo sprintf("<td %s>filesize</td>", $attributes);
-    //                     break;
-    //                 case "column_date":
-    //                     echo sprintf("<td %s>date</td>", $attributes);
-    //                     break;
-    //             }
-    //         }
-
-    //         //Close the line
-    //         echo "</tr>";
-    //     }
-    // }
+        $caches = $_POST["caches"];
+        if (!is_array($caches))
+            $caches = [$caches];
+        
+        foreach ($caches as $cache)
+            unlink(sprintf("%s/%s.json", WP_API_CACHE_FOLDER, $cache));
+    }
 
     public function no_items()
     {
-        return "No caches available";
+        _e("No caches available");
+    }
+
+    public function prepare_items()
+    {
+        $this->_column_headers = [$this->get_columns(), [], $this->get_sortable_columns(), $this->get_primary_column_name()];
+        $this->process_bulk_action();
+
+        $files = scandir(WP_API_CACHE_FOLDER);
+        $files = array_values(array_diff($files, [".", ".."]));
+        $files = array_map(function($name) {
+            $filepath = sprintf("%s/%s", WP_API_CACHE_FOLDER, $name);
+            $fileInfo = new SplFileInfo($filepath);
+            return [
+                "name" => pathinfo($name, PATHINFO_FILENAME),
+                "filename" => $name,
+                "fullpath" => $filepath,
+                "size" => $fileInfo->getSize(),
+                "date_modified" => $fileInfo->getMTime()
+            ];
+        }, $files);
+
+        $total_items = count($files);
+        $items_per_page = $this->get_items_per_page("users_per_page");
+        $current_page = $this->get_pagenum();	
+        $this->items = array_slice($files, ($current_page - 1) * $items_per_page, $items_per_page);
+
+        $this->set_pagination_args([
+            "total_items" => $total_items,
+            "per_page" => $items_per_page,
+            "total_pages" => ceil($total_items / $items_per_page)
+        ]);
     }
 };
