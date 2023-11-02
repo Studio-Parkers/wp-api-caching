@@ -12,11 +12,14 @@
     border: 1px solid #3C434A;
 }
 
-#wp-api-caching-options fieldset > legend
+#wp-api-caching-options fieldset legend
 {
     cursor: pointer;
     user-select: none;
 }
+
+#wp-api-caching-options fieldset legend::before
+{padding: 5px}
 
 #wp-api-caching-options fieldset[collapsed="false"]
 {
@@ -24,11 +27,25 @@
     padding: 1rem;
 }
 
-#wp-api-caching-options fieldset > legend::before
-{padding: 5px}
+#wp-api-caching-options fieldset[collapsed="true"] > legend::before {content: "\25B6"}
+#wp-api-caching-options fieldset[collapsed="false"] > legend::before {content: "\25BC"}
 
-#wp-api-caching-options fieldset[collapsed="true"] > legend::before
-{content: "\25B6"}
+#wp-api-caching-options fieldset .related-types {overflow: hidden}
+#wp-api-caching-options fieldset .related-types[collapsed="true"] {height: 0px}
+#wp-api-caching-options fieldset .related-types[collapsed="false"] {height: auto}
 
-#wp-api-caching-options fieldset[collapsed="false"] > legend::before
-{content: "\25BC"}
+#wp-api-caching-options fieldset .related-types .related-types-dropdowns
+{
+    gap: 1rem;
+    display: flex;
+    max-width: 320px;
+    flex-direction: column;
+}
+
+#wp-api-caching-options fieldset .related-types .post-type-row
+{
+    gap: 1rem;
+    display: flex;
+}
+
+#wp-api-caching-options fieldset .related-types .post-type-row select {flex: 1}
