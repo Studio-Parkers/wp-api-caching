@@ -66,6 +66,8 @@ const setupEventListener = (fieldset)=>
         input.addEventListener("change", toggleRelatedPosts);
         input.dispatchEvent(new Event("change"));
     });
+
+    fieldset.querySelectorAll("button[name=\"remove-relation-btn\"]")?.forEach(btn=> btn.addEventListener("click", removeRelation));
 };
 
 const initialize = ()=>

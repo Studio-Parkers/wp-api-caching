@@ -2,8 +2,8 @@
 // Register custom admin style
 add_action("admin_init", function(): void
 {
-    wp_enqueue_style("options-css", plugins_url("stylesheets/options.css", __FILE__), [], "1.0.2");
-    wp_enqueue_script("options-js", plugins_url("javascript/options.js", __FILE__), [], "1.0.2", true);
+    wp_enqueue_style("options-css", plugins_url("stylesheets/options.css", __FILE__), [], "1.0.0");
+    wp_enqueue_script("options-js", plugins_url("javascript/options.js", __FILE__), [], "1.0.0", true);
 
     wp_enqueue_style("dashboard-css", plugins_url("stylesheets/dashboard.css", __FILE__));
 });

@@ -6,7 +6,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST")
 {
     $tmp = [];
     foreach ($_POST as $key => $value) {
-        if (str_ends_with($key, "_relations"))
+        if (str_ends_with($key, "_relations") && isset($tmp[$key]))
             $tmp[str_replace("_relations", "", $key)]["relations"] = $value;
         else
             $tmp[$key] = ["enabled"=> $value === "on"];
@@ -23,7 +23,6 @@ if (is_null($options))
 }
 
 $options = json_decode($options, true);
-error_log(json_encode($options));
 $post_types = get_post_types();
 ?>
 
@@ -53,11 +52,15 @@ const postTypes = <?php echo json_encode(array_values($post_types)); ?>;
 
                         <?php if (isset($options[$hash]["relations"]) && !empty($options[$hash]["relations"])): ?>
                         <?php foreach ($options[$hash]["relations"] as $relation): ?>
-                        <select>
-                            <?php foreach ($post_types as $post_type): ?>
-                            <option <?php echo $relation === $post_type ? "selected" : ""; ?> value="<?php echo $post_type; ?>"><?php echo $post_type ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="post-type-row">
+                            <select name="<?php echo sprintf("%s_relations[]", $hash); ?>">
+                                <?php foreach ($post_types as $post_type): ?>
+                                <option <?php echo $relation === $post_type ? "selected" : ""; ?> value="<?php echo $post_type; ?>"><?php echo $post_type ?></option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <button name="remove-relation-btn" type="button">remove</button>
+                        </div>
                         <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
