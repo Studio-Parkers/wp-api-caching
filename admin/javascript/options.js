@@ -24,6 +24,48 @@ const removeRelation = (event)=>
     row.parentElement.removeChild(row);
 };
 
+/**
+ * 
+ * @param {InputEvent} event 
+ */
+const updateIDDropdown = (event)=>
+{
+    const idDropdown = event.target.nextElementSibling;
+    idDropdown.innerHTML = "";
+
+    const allPosts = [{ID: -1, post_title: "Any"}, ...posts[event.target.value]];
+    allPosts.forEach(post=>
+    {
+        const option = document.createElement("option");
+        option.value = post.ID;
+        option.innerHTML = post.post_title;
+        if (post.ID >= 0)
+            option.innerHTML = `${option.innerHTML} - ID ${post.ID}`;
+        
+        idDropdown.appendChild(option);
+    });
+};
+
+const resetDropdowns = (newSelector = null)=>
+{    
+    const typeSelectors = newSelector ? [newSelector] : document.querySelectorAll("select[name$=\"_relations[]\"]");
+    typeSelectors.forEach(select=>
+    {
+        const selected = select.value;
+        const selectedRelation = select.nextElementSibling.value;
+
+        // Stupid hack to make sure even is only added once
+        select.removeEventListener("change", updateIDDropdown);
+        select.addEventListener("change", updateIDDropdown);
+        select.dispatchEvent(new Event("change"));
+
+        select.value = selected;
+
+        if (selectedRelation)
+            select.nextElementSibling.value = selectedRelation;
+    });
+};
+
 const addRelation = (event)=>
 {
     const parent = event.target.parentElement;
@@ -42,11 +84,17 @@ const addRelation = (event)=>
         select.appendChild(option);
     });
 
+    const selectID = document.createElement("select");
+    selectID.name = `${parent.getAttribute("data-hash")}_related_posts[]`;
+    container.appendChild(selectID);
+
     const btn = document.createElement("button");
     btn.type = "button";
     btn.innerHTML = "remove";
     btn.addEventListener("click", removeRelation);
     container.appendChild(btn);
+
+    resetDropdowns(select);
 };
 
 /**
@@ -78,6 +126,8 @@ const initialize = ()=>
 
     form.querySelectorAll("fieldset")
         .forEach(setupEventListener);
+
+    resetDropdowns();
 };
 
 window.addEventListener("DOMContentLoaded", initialize);
