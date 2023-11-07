@@ -1,5 +1,8 @@
 name: Production release
 
+env:
+  plugin_name: wp-api-caching
+
 # Cancel previous workflows
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -23,19 +26,19 @@ jobs:
         with:
           find: Version:(\s*)([[0-9\.]*)
           replace: "Version: ${{ github.ref_name }}"
-          include: "wp-api-caching.php"
+          include: "${{env.plugin_name}}.php"
 
       - name: Push version changes to main branch
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore: release ${{ github.ref_name }}"
           branch: ${{ github.event.repository.default_branch }}
-          file_pattern: wp-base.php
+          file_pattern: ${{ env.plugin_name }}.php
 
       - name: zip files
         run: |
-          rsync -r -e '.git*' -e '.DS_Store' ./* wp-base
-          zip -r wp-base-${{  github.ref_name }}.zip wp-base
+          rsync -r -e '.git*' -e '.DS_Store' ./* ${{ env.plugin_name }}
+          zip -r ${{ env.plugin_name }}-${{  github.ref_name }}.zip ${{ env.plugin_name }}
 
       - name: Upload files to server
         uses: easingthemes/ssh-deploy@v4
@@ -44,7 +47,7 @@ jobs:
           REMOTE_USER: ${{ vars.SSH_USER }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
           TARGET: ${{ vars.PLUGINS_DIR  }}
-          SOURCE: wp-base-${{  github.ref_name }}.zip
+          SOURCE: ${{ env.plugin_name }}-${{  github.ref_name }}.zip
           ARGS: -rltzvO
           SCRIPT_AFTER: |
-            docker exec satispress wp --allow-root plugin install /var/www/plugins-archive/wp-base-${{ github.ref_name }}.zip --force
+            docker exec satispress wp --allow-root plugin install /var/www/plugins-archive/wp-api-caching-${{ github.ref_name }}.zip --force
