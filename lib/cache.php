@@ -49,11 +49,11 @@ function is_caching_enabled(WP_REST_Request $request)
             continue;
     
         $option_path = base64_decode($key);
-        $option_path = preg_replace("/(\(\?P<(id)>(.*)\))/m", ":$2", $option_path);
-        foreach ($route_params as $i=> $v)
-            $option_path = str_replace(":$i", "$v", $option_path);
+        $option_path = str_replace("/", "\/", $option_path);
+        $option_path = preg_replace("/\(\?P<[a-zA-Z]+>(\[\\\[a-zA-Z0-9]\][\+\*])\)/m", "($1)", $option_path);
+        $option_path = preg_replace("/\(\[(\\\[a-zA-Z0-9])\][\+\*]\)/m", "($1)", $option_path);
 
-        if ($route === $option_path)
+        if (preg_match("/$option_path/", $route) === 1)
             return true;
     }
 
