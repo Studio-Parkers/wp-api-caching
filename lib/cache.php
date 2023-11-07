@@ -69,3 +69,16 @@ function should_cache_response(WP_HTTP_Response $response, WP_REST_Server $serve
 
     return false;
 }
+
+function delete_cache(string $url_pattern): void
+{
+    $files = scandir(WP_API_CACHE_FOLDER);
+    $files = array_values(array_diff($files, [".", ".."]));
+    foreach ($files as $file)
+    {
+        $path = pathinfo($file, PATHINFO_FILENAME);
+        $path = base64_decode($file);
+        if (preg_match($url_pattern, $path) === 1)
+            unlink(sprintf("%s/%s", WP_API_CACHE_FOLDER, $file));
+    }
+}

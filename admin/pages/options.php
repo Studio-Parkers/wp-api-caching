@@ -5,7 +5,6 @@ $option_name = "wp-api-cache";
 if ($_SERVER["REQUEST_METHOD"] === "POST")
 {
     $tmp = [];
-    error_log(json_encode($_POST));
     foreach ($_POST as $key => $value)
     {
         if (str_ends_with($key, "_relations"))
@@ -41,7 +40,6 @@ if (is_null($options))
     $options = get_option($option_name);
 }
 $options = json_decode($options, true);
-error_log(json_encode($options));
 
 $post_types = get_post_types();
 $posts = array_map(function(string $post_type): array
