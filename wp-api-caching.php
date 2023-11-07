@@ -3,7 +3,7 @@
  * Plugin Name: WP API Caching
  * Description: Cache API routes
  * Author: Dani Krokkee
- * Version: 1.0.0
+ * Version: 0.0.1
  */
 
 if (!defined("WP_API_CACHE_FOLDER"))
