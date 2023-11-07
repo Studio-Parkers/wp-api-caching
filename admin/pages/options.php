@@ -77,7 +77,7 @@ const posts = <?php echo json_encode($posts); ?>;
             <?php if (count($get_requests) > 0): ?>
             <?php $hash = base64_encode($path); ?>
             <div>
-                <input id="<?php echo $hash; ?>" name="<?php echo $hash; ?>" <?php echo isset($options[$hash]) && $options[$hash]["enabled"] ? "checked" : ""; ?> type="checkbox" />
+                <input id="<?php echo $hash; ?>" name="<?php echo $hash; ?>" <?php echo isset($options[$hash]["enabled"]) && $options[$hash]["enabled"] ? "checked" : ""; ?> type="checkbox" />
                 <label for="<?php echo $hash; ?>"><?php echo get_rest_url(null, $path); ?></label>
                 <fieldset class="related-types">
                     <legend>Related post types</legend>

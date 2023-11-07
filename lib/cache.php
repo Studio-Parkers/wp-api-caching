@@ -55,13 +55,16 @@ function should_cache_response(WP_HTTP_Response $response, WP_REST_Server $serve
     $route = $request->get_route();
     $route_params = $request->get_url_params();
 
-    $options = json_decode($options);
+    $options = json_decode($options, true);
     foreach ($options as $key => $value)
     {
+        if (!isset($value["enabled"]) || !$value["enabled"])
+            continue;
+    
         $option_path = base64_decode($key);
         $option_path = preg_replace("/(\(\?P<(id)>(.*)\))/m", ":$2", $option_path);
-        foreach ($route_params as $key=> $value)
-            $option_path = str_replace(":$key", "$value", $option_path);
+        foreach ($route_params as $i=> $v)
+            $option_path = str_replace(":$i", "$v", $option_path);
 
         if ($route === $option_path)
             return true;

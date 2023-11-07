@@ -4,7 +4,8 @@ require_once "lib/cache.php";
 add_filter("rest_pre_dispatch", function(mixed $result, WP_REST_Server $server, WP_REST_Request $request)
 {
     $hash = base64_encode($request->get_route());
-    if ($request->get_method() === "GET")
+    $is_internal = empty($request->get_headers());
+    if (!$is_internal && $request->get_method() === "GET")
     {
         $cache = read_cache($hash);
 
