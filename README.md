@@ -1,5 +1,6 @@
 # WP API Caching
 A plugin that caches API responses into a JSON file and serves the file when the request url matches.
+![Screenshot 2023-11-07 at 14 14 57](https://github.com/Studio-Parkers/wp-api-caching/assets/15921568/a70a4528-45f8-42ce-a2d4-28e118bbc176)
 
 ## Table of Contents
 - [Requirements](#requirements)
